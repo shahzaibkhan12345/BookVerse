@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
-# TODO: Import modules when they are created
+# Import modules when they are created
 # from src.data.make_dataset import main as process_data
-# from src.models.train_model import main as train_models
+from src.models.train_model import main as train_models
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -33,7 +33,7 @@ def main():
         # process_data()
     elif args.command == 'train':
         logger.info("Running model training...")
-        # train_models()
+        train_models()
     elif args.command == 'api':
         logger.info(f"Starting API server on {args.host}:{args.port}...")
         try:
