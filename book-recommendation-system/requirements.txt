@@ -5,3 +5,5 @@ fastapi
 uvicorn[standard]
 python-dotenv
 ipykernel
+matplotlib
+saeborn
