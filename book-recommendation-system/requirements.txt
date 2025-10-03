@@ -1,8 +1,7 @@
 pandas
 numpy
 scikit-learn
-surprise
 fastapi
 uvicorn[standard]
 python-dotenv
-jupyter
+ipykernel
