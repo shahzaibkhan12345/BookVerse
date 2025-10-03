@@ -22,70 +22,49 @@ class CollaborativeFilter:
 
     def train(self, ratings_path):
         """
-        Trains the SVD model on user ratings."""
+        Trains the SVD model on user ratings.
+        """
         print("Starting Collaborative Filtering Model Training (with Scikit-learn)...")
         
         # Load processed data
         self.ratings_df = pd.read_csv(ratings_path)
+        print(f"Loaded {len(self.ratings_df)} ratings.")
 
-        # --- THIS IS THE FIX ---
         # Group by user and book, and take the mean of their ratings to handle duplicates
         print("Aggregating duplicate ratings...")
         ratings_agg = self.ratings_df.groupby(['user_id', 'book_id'])['rating'].mean().reset_index()
-        print("Duplicates handled.")
-        # --- END OF FIX ---
+        print(f"Aggregated to {len(ratings_agg)} unique user-book ratings.")
 
         # Create the user-item interaction matrix from the aggregated data
+        print("Creating interaction matrix...")
         interaction_matrix_df = ratings_agg.pivot(index='user_id', columns='book_id', values='rating').fillna(0)
-        
+        print("Interaction matrix created successfully.")
+
         # Create mappings to convert between IDs and matrix indices
+        print("Creating user and book mappings...")
         self.user_to_index_map = {user_id: i for i, user_id in enumerate(interaction_matrix_df.index)}
         self.book_to_index_map = {book_id: i for i, book_id in enumerate(interaction_matrix_df.columns)}
         self.index_to_book_map = {i: book_id for book_id, i in self.book_to_index_map.items()}
 
         # Convert to a sparse matrix format for efficiency
+        print("Converting to sparse matrix...")
         self.interaction_matrix = csr_matrix(interaction_matrix_df.values)
+        print(f"Sparse matrix created with shape: {self.interaction_matrix.shape}")
 
         # Instantiate and train the SVD algorithm
+        print("Training SVD model...")
         self.model = TruncatedSVD(n_components=self.n_components, random_state=42)
         self.model.fit(self.interaction_matrix)
         
         print("Collaborative Filtering Model Training Complete!")
-        print(f"Interaction Matrix Shape: {self.interaction_matrix.shape}")
         print(f"SVD Model Components: {self.n_components}")
-
-    def _predict_rating(self, user_id, book_id):
-        """
-        Internal helper to predict a single rating.
-        """
-        if self.model is None:
-            raise RuntimeError("Model is not trained yet. Please call train() first.")
-        
-        # Check if user and book exist in our training data
-        if user_id not in self.user_to_index_map or book_id not in self.book_to_index_map:
-            return np.nan # Return NaN if we can't predict
-
-        user_idx = self.user_to_index_map[user_id]
-        book_idx = self.book_to_index_map[book_id]
-
-        # Reconstruct the matrix and get the predicted rating
-        # This is one way to do it, but can be slow for many predictions.
-        # A faster way is to use the user and item latent features directly.
-        user_vec = self.model.transform(self.interaction_matrix[user_idx])
-        item_vec = self.model.components_.T[book_idx]
-        
-        # Predict rating is the dot product of user and item latent vectors
-        # We also need to add the global mean and biases for a more accurate prediction
-        # For simplicity, we'll use the dot product here.
-        return np.dot(user_vec, item_vec)[0]
-
 
     def get_user_recommendations(self, user_id, n=10):
         """
         Gets top N recommendations for a given user.
         """
-        if self.model is None:
-            raise RuntimeError("Model is not trained yet. Please call train() first.")
+        if self.model is None or self.interaction_matrix is None or self.ratings_df is None:
+            raise RuntimeError("Model is not trained or loaded correctly. Please call train() or load_model() first.")
 
         if user_id not in self.user_to_index_map:
             print(f"User {user_id} not found in training data. Cannot provide recommendations.")
@@ -99,8 +78,7 @@ class CollaborativeFilter:
         # Get all item latent feature vectors
         all_item_vecs = self.model.components_.T
         
-        # Calculate the predicted rating for every item by taking the dot product
-        # of the user vector with all item vectors
+        # Calculate the predicted rating for every item
         predicted_ratings = np.dot(all_item_vecs, user_vec.T)
         
         # Get the list of books the user has already rated
@@ -120,7 +98,7 @@ class CollaborativeFilter:
         return [rec[0] for rec in recommendations[:n]]
 
     def save_model(self, model_path):
-        """Saves the trained model and mappings."""
+        """Saves the trained model and all necessary data."""
         if not os.path.exists(model_path):
             os.makedirs(model_path)
         with open(os.path.join(model_path, 'svd_model.pkl'), 'wb') as f:
@@ -131,10 +109,16 @@ class CollaborativeFilter:
                 'book_to_index_map': self.book_to_index_map,
                 'index_to_book_map': self.index_to_book_map
             }, f)
+        # Save the interaction matrix and ratings_df as well
+        with open(os.path.join(model_path, 'interaction_matrix.pkl'), 'wb') as f:
+            pickle.dump(self.interaction_matrix, f)
+        with open(os.path.join(model_path, 'ratings_df.pkl'), 'wb') as f:
+            pickle.dump(self.ratings_df, f)
         print(f"Collaborative Filtering model artifacts saved to {model_path}")
 
     def load_model(self, model_path):
-        """Loads the trained model and mappings."""
+        """Loads the trained model and all necessary data."""
+        print(f"Attempting to load CF model from: {model_path}")
         with open(os.path.join(model_path, 'svd_model.pkl'), 'rb') as f:
             self.model = pickle.load(f)
         with open(os.path.join(model_path, 'cf_mappings.pkl'), 'rb') as f:
@@ -142,4 +126,9 @@ class CollaborativeFilter:
             self.user_to_index_map = mappings['user_to_index_map']
             self.book_to_index_map = mappings['book_to_index_map']
             self.index_to_book_map = mappings['index_to_book_map']
-        print("Collaborative Filtering model artifacts loaded.")
+        # Load the interaction matrix and ratings_df
+        with open(os.path.join(model_path, 'interaction_matrix.pkl'), 'rb') as f:
+            self.interaction_matrix = pickle.load(f)
+        with open(os.path.join(model_path, 'ratings_df.pkl'), 'rb') as f:
+            self.ratings_df = pickle.load(f)
+        print("Collaborative Filtering model artifact loaded.")

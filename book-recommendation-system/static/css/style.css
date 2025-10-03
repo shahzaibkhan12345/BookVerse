@@ -1,2 +1,186 @@
-/* Add your bold and unique styles here! */
-body { font-family: sans-serif; background-color: #f4f4f4; }
+/* static/css/style.css */
+
+:root {
+    --primary-color: #6a5acd; /* Slate Blue */
+    --background-color: #0f0f1e;
+    --surface-color: #1e1e2f;
+    --text-color: #e0e0e0;
+    --accent-color: #fca311;
+    --font-family: 'Poppins', sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    background-image: url('https://www.transparenttextures.com/patterns/stardust.png');
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 4rem;
+    margin-bottom: 0;
+    background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+header p {
+    font-size: 1.2rem;
+    color: #a0a0a0;
+}
+
+.input-section {
+    background: rgba(30, 30, 47, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 30px;
+    margin-top: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+input[type="number"], input[type="text"] {
+    width: 80%;
+    max-width: 400px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #555;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-color);
+    font-size: 1rem;
+}
+
+.search-results-dropdown {
+    position: absolute;
+    width: 80%;
+    max-width: 400px;
+    max-height: 150px;
+    overflow-y: auto;
+    background: var(--surface-color);
+    border: 1px solid #555;
+    border-radius: 8px;
+    z-index: 10;
+    text-align: left;
+}
+
+.search-result-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.search-result-item:hover {
+    background-color: var(--primary-color);
+}
+
+.slider-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+input[type="range"] {
+    width: 200px;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+button:hover {
+    background-color: var(--accent-color);
+    transform: translateY(-3px);
+}
+
+.loading-indicator.hidden, .recommendations-container.hidden {
+    display: none;
+}
+
+.loading-indicator {
+    margin-top: 40px;
+}
+
+.spinner {
+    border: 8px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top: 8px solid var(--primary-color);
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.book-card {
+    background: rgba(30, 30, 47, 0.8);
+    backdrop-filter: blur(5px);
+    border-radius: 12px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    text-align: left;
+}
+
+.book-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+}
+
+.book-card img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.book-card h3 {
+    font-size: 1rem;
+    margin: 0;
+    min-height: 40px;
+}
+
+.book-card p {
+    font-size: 0.8rem;
+    color: #a0a0a0;
+    margin: 5px 0 0 0;
+}

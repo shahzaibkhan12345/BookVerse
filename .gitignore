@@ -55,6 +55,7 @@ cover/
 *.mo
 *.pot
 raw/
+/models
 *processed
 # Django stuff:
 *.log
